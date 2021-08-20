@@ -12,7 +12,7 @@ namespace APICatalogo.Models
             Produtos = new Collection<Produto>();
         }
 
-        
+
         public int CategoriaId { get; set; }
         [Required]
         [MaxLength(80)]

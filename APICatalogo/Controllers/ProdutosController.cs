@@ -59,7 +59,7 @@ namespace ApiCatalogo.Controllers
             return Ok();
         }
 
-        [HttpDelete ("{id}")]
+        [HttpDelete("{id}")]
         public ActionResult<Produto> Delete(int id)
         {
             var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);

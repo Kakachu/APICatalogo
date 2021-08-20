@@ -15,7 +15,7 @@ namespace APICatalogo.Controllers
     {
         private readonly AppDbContext _context;
 
-        
+
         public CategoriasController(AppDbContext contexto)
         {
             _context = contexto;
@@ -121,7 +121,7 @@ namespace APICatalogo.Controllers
                      $"Erro ao tentar excluir categoria de id = {id} ");
             }
 
-            
+
         }
     }
 }
