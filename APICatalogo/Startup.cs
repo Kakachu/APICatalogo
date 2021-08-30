@@ -1,3 +1,4 @@
+using APICatalogo.Controllers.Logging;
 using APICatalogo.Extensions;
 using APICatalogo.Filters;
 using APICatalogo.Models.Context;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -43,7 +45,8 @@ namespace APICatalogo
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
+            ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -54,6 +57,13 @@ namespace APICatalogo
                     c.SwaggerEndpoint("./v1/swagger.json", "APICatalogo V1");
                 });
             }
+
+            loggerFactory.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+            {
+                LogLevel = LogLevel.Information
+            }));;
+
+
             //Middleware de tratamento de erros
             app.ConfigureExceptionHandler();
 

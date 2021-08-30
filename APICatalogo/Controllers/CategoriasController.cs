@@ -3,6 +3,7 @@ using APICatalogo.Models.Context;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,22 +15,29 @@ namespace APICatalogo.Controllers
     public class CategoriasController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger _logger;
 
 
-        public CategoriasController(AppDbContext contexto)
+        public CategoriasController(AppDbContext contexto, ILogger<CategoriasController> logger)
         {
             _context = contexto;
+            _logger = logger;
         }
 
         [HttpGet("Produtos")]
         public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
         {
+            _logger.LogInformation("=====================GET api/categorias/produtos =========================");
+
+
             return _context.Categorias.Include(x => x.Produtos).ToList();
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> Get()
         {
+            _logger.LogInformation("=====================GET api/categorias =========================");
+
             try
             {
                 return _context.Categorias.AsNoTracking().ToList();
@@ -45,6 +53,8 @@ namespace APICatalogo.Controllers
         [HttpGet("{id}", Name = "ObterCategoriaId")]
         public ActionResult<Categoria> Get(int id)
         {
+            _logger.LogInformation($"=====================GET api/categorias/id = {id} =========================");
+
             try
             {
                 var categoria = _context.Categorias.AsNoTracking().FirstOrDefault(p => p.CategoriaId == id);
@@ -52,6 +62,7 @@ namespace APICatalogo.Controllers
                 if (categoria == null)
                 {
                     return NotFound($"a categoria com id ={id} não foi encontrada");
+                    _logger.LogInformation($"=====================GET api/categorias/id = {id} NOT FOUND =========================");
                 }
                 return categoria;
             }
