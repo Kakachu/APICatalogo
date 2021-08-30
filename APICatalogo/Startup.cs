@@ -1,3 +1,4 @@
+using APICatalogo.Extensions;
 using APICatalogo.Filters;
 using APICatalogo.Models.Context;
 using Microsoft.AspNetCore.Builder;
@@ -53,6 +54,8 @@ namespace APICatalogo
                     c.SwaggerEndpoint("./v1/swagger.json", "APICatalogo V1");
                 });
             }
+            //Middleware de tratamento de erros
+            app.ConfigureExceptionHandler();
 
             app.UseDeveloperExceptionPage();
 
