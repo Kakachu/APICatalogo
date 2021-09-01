@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace APICatalogo.Repository
 {
-    interface IRepository<T>
+    public interface IRepository<T>
     {
         IQueryable<T> Get();
         T GetById(Expression<Func<T, bool>> predicate);
