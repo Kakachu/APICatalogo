@@ -1,5 +1,8 @@
-﻿using APICatalogo.Models;
+﻿using APICatalogo.DTOs;
+using APICatalogo.Models;
 using APICatalogo.Models.Context;
+using APICatalogo.Repository;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,39 +17,36 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class CategoriasController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _context;
         private readonly ILogger _logger;
+        private readonly IMapper _mapper;
 
-
-        public CategoriasController(AppDbContext contexto, ILogger<CategoriasController> logger)
+        public CategoriasController(IUnitOfWork contexto, ILogger<CategoriasController> logger, IMapper mapper)
         {
             _context = contexto;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpGet("Produtos")]
-        public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
+        public ActionResult<IEnumerable<CategoriaDTO>> GetCategoriasProdutos()
         {
             _logger.LogInformation("=====================GET api/categorias/produtos =========================");
 
+            var categorias = _context.CategoriaRepository.GetCategoriasProdutos().ToList();
+            var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
 
-            return _context.Categorias.Include(x => x.Produtos).ToList();
+            return categoriasDto;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Categoria>> Get()
+        public ActionResult<IEnumerable<CategoriaDTO>> Get()
         {
             _logger.LogInformation("=====================GET api/categorias =========================");
 
-            try
-            {
-                return _context.Categorias.AsNoTracking().ToList();
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                       "Erro ao tentar obter categorias do banco de dados");
-            }
+            var categorias = _context.CategoriaRepository.Get().ToList();
+            var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
+            return categoriasDto;
         }
 
 
@@ -54,16 +54,18 @@ namespace APICatalogo.Controllers
         public ActionResult<Categoria> Get(int id)
         {
             _logger.LogInformation($"=====================GET api/categorias/id = {id} =========================");
-
+            
             try
             {
-                var categoria = _context.Categorias.AsNoTracking().FirstOrDefault(p => p.CategoriaId == id);
+                var categoria = _context.CategoriaRepository.GetById(p => p.CategoriaId == id);
 
                 if (categoria == null)
                 {
-                    return NotFound($"a categoria com id ={id} não foi encontrada");
                     _logger.LogInformation($"=====================GET api/categorias/id = {id} NOT FOUND =========================");
+                    return NotFound($"a categoria com id ={id} não foi encontrada");
                 }
+                var categoriaDto = _mapper.Map<CategoriaDTO>(categoria);
+
                 return categoria;
             }
             catch (Exception)
@@ -74,14 +76,19 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Categoria> Post([FromBody] Categoria categoria)
+        public ActionResult<CategoriaDTO> Post([FromBody] CategoriaDTO categoriaDto)
         {
             try
             {
-                _context.Categorias.Add(categoria);
-                _context.SaveChanges();
+                var categoria = _mapper.Map<Categoria>(categoriaDto);
+
+                _context.CategoriaRepository.Add(categoria);
+                _context.Commit();
+
+                var categoriaDTO = _mapper.Map<CategoriaDTO>(categoria);
+
                 return new CreatedAtRouteResult("ObterCategoriaId",
-                    new { id = categoria.CategoriaId }, categoria);
+                    new { id = categoria.CategoriaId }, categoriaDTO);
             }
             catch (Exception)
             {
@@ -91,17 +98,20 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] Categoria categoria)
+        public ActionResult Put(int id, [FromBody] CategoriaDTO categoriaDto)
         {
             try
-            {
-                if (id != categoria.CategoriaId)
+            { 
+                if (id != categoriaDto.CategoriaId)
                 {
                     return BadRequest($"A categoria com id = { id} não foi encontrada");
                 }
 
-                _context.Entry(categoria).State = EntityState.Modified;
-                _context.SaveChanges();
+                var categoria = _mapper.Map<Categoria>(categoriaDto);
+                
+                _context.CategoriaRepository.Update(categoria);
+                _context.Commit();
+
                 return Ok($"A categoria com id = { id} foi atualizada com sucesso ");
             }
             catch (Exception)
@@ -116,14 +126,14 @@ namespace APICatalogo.Controllers
         {
             try
             {
-                var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+                var categoria = _context.CategoriaRepository.GetById(p => p.CategoriaId == id);
 
                 if (categoria == null)
                 {
                     return NotFound();
                 }
-                _context.Categorias.Remove(categoria);
-                _context.SaveChanges();
+                _context.CategoriaRepository.Delete(categoria);
+                _context.Commit();
                 return categoria;
             }
             catch (Exception)
