@@ -1,12 +1,14 @@
 ﻿using APICatalogo.DTOs;
 using APICatalogo.Models;
 using APICatalogo.Models.Context;
+using APICatalogo.Pagination;
 using APICatalogo.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,11 +42,25 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<CategoriaDTO>> Get()
+        public ActionResult<IEnumerable<CategoriaDTO>> Get([FromQuery] CategoriasParameters categoriasParameters)
         {
+
             _logger.LogInformation("=====================GET api/categorias =========================");
 
-            var categorias = _context.CategoriaRepository.Get().ToList();
+            var categorias = _context.CategoriaRepository.GetCategorias(categoriasParameters);
+
+            var metadata = new
+            {
+                categorias.TotalCount,
+                categorias.PageSize,
+                categorias.CurrentPage,
+                categorias.TotalPages,
+                categorias.HasNext,
+                categorias.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
             var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
             return categoriasDto;
         }
@@ -54,7 +70,7 @@ namespace APICatalogo.Controllers
         public ActionResult<Categoria> Get(int id)
         {
             _logger.LogInformation($"=====================GET api/categorias/id = {id} =========================");
-            
+
             try
             {
                 var categoria = _context.CategoriaRepository.GetById(p => p.CategoriaId == id);
@@ -101,14 +117,14 @@ namespace APICatalogo.Controllers
         public ActionResult Put(int id, [FromBody] CategoriaDTO categoriaDto)
         {
             try
-            { 
+            {
                 if (id != categoriaDto.CategoriaId)
                 {
                     return BadRequest($"A categoria com id = { id} não foi encontrada");
                 }
 
                 var categoria = _mapper.Map<Categoria>(categoriaDto);
-                
+
                 _context.CategoriaRepository.Update(categoria);
                 _context.Commit();
 
