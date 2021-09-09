@@ -1,17 +1,16 @@
 ﻿using APICatalogo.DTOs;
 using APICatalogo.Models;
-using APICatalogo.Models.Context;
 using APICatalogo.Pagination;
 using APICatalogo.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
@@ -31,24 +30,26 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("Produtos")]
-        public ActionResult<IEnumerable<CategoriaDTO>> GetCategoriasProdutos()
+        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoriasProdutos()
         {
             _logger.LogInformation("=====================GET api/categorias/produtos =========================");
 
-            var categorias = _context.CategoriaRepository.GetCategoriasProdutos().ToList();
+            var categorias = await _context.CategoriaRepository.GetCategoriasProdutos();
+
             var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
 
             return categoriasDto;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<CategoriaDTO>> Get([FromQuery] CategoriasParameters categoriasParameters)
+        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get([FromQuery] CategoriasParameters categoriasParameters)
         {
 
             _logger.LogInformation("=====================GET api/categorias =========================");
 
-            var categorias = _context.CategoriaRepository.GetCategorias(categoriasParameters);
-
+            var categorias = await _context.CategoriaRepository.
+                GetCategorias(categoriasParameters);
+            
             var metadata = new
             {
                 categorias.TotalCount,
@@ -67,13 +68,13 @@ namespace APICatalogo.Controllers
 
 
         [HttpGet("{id}", Name = "ObterCategoriaId")]
-        public ActionResult<Categoria> Get(int id)
+        public async Task<ActionResult<Categoria>> Get(int id)
         {
             _logger.LogInformation($"=====================GET api/categorias/id = {id} =========================");
 
             try
             {
-                var categoria = _context.CategoriaRepository.GetById(p => p.CategoriaId == id);
+                var categoria = await _context.CategoriaRepository.GetById(p => p.CategoriaId == id);
 
                 if (categoria == null)
                 {
@@ -92,14 +93,14 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPost]
-        public ActionResult<CategoriaDTO> Post([FromBody] CategoriaDTO categoriaDto)
+        public async Task<ActionResult<CategoriaDTO>> Post([FromBody] CategoriaDTO categoriaDto)
         {
             try
             {
                 var categoria = _mapper.Map<Categoria>(categoriaDto);
 
                 _context.CategoriaRepository.Add(categoria);
-                _context.Commit();
+                await _context.Commit();
 
                 var categoriaDTO = _mapper.Map<CategoriaDTO>(categoria);
 
@@ -114,7 +115,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] CategoriaDTO categoriaDto)
+        public async Task<ActionResult> Put(int id, [FromBody] CategoriaDTO categoriaDto)
         {
             try
             {
@@ -126,7 +127,7 @@ namespace APICatalogo.Controllers
                 var categoria = _mapper.Map<Categoria>(categoriaDto);
 
                 _context.CategoriaRepository.Update(categoria);
-                _context.Commit();
+                await _context.Commit();
 
                 return Ok($"A categoria com id = { id} foi atualizada com sucesso ");
             }
@@ -138,18 +139,18 @@ namespace APICatalogo.Controllers
         }
 
         [HttpDelete("{id}")]
-        public ActionResult<Categoria> Delete(int id)
+        public async Task<ActionResult<Categoria>> Delete(int id)
         {
             try
             {
-                var categoria = _context.CategoriaRepository.GetById(p => p.CategoriaId == id);
+                var categoria = await _context.CategoriaRepository.GetById(p => p.CategoriaId == id);
 
                 if (categoria == null)
                 {
                     return NotFound();
                 }
                 _context.CategoriaRepository.Delete(categoria);
-                _context.Commit();
+                await _context.Commit();
                 return categoria;
             }
             catch (Exception)
