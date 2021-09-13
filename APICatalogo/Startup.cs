@@ -5,6 +5,7 @@ using APICatalogo.Filters;
 using APICatalogo.Models.Context;
 using APICatalogo.Repository;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -13,8 +14,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Linq;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace APICatalogo
@@ -53,6 +56,23 @@ namespace APICatalogo
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
+
+            //JWT
+            services.AddAuthentication(
+               JwtBearerDefaults.AuthenticationScheme).
+               AddJwtBearer(options =>
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidAudience = Configuration["TokenConfiguration:Audience"],
+                    ValidIssuer = Configuration["TokenConfiguration:Issuer"],
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(Configuration["Jwt:key"]))
+                });
+
 
             services.AddControllers()
             .AddJsonOptions(x =>
