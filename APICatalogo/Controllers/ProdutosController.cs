@@ -5,6 +5,7 @@ using APICatalogo.Pagination;
 using APICatalogo.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace ApiCatalogo.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[Controller]")]
     [ApiController]
     public class ProdutosController : ControllerBase
@@ -27,6 +28,7 @@ namespace ApiCatalogo.Controllers
         }
 
         [HttpGet("menorpreco")]
+        [EnableCors("AllowRequest")]
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutosPrecos()
         {
             var produtos = await _uof.ProdutoRepository.GetProdutosPorPreco();
@@ -37,6 +39,7 @@ namespace ApiCatalogo.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
+        [EnableCors("AllowRequest")]
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get([FromQuery] ProdutosParameters produtosParameters)
         {
             var produtos = await _uof.ProdutoRepository.GetProdutos(produtosParameters);
@@ -59,6 +62,7 @@ namespace ApiCatalogo.Controllers
         }
 
         [HttpGet("{id}", Name = "ObterProduto")]
+        [EnableCors("AllowRequest")]
         public async Task<ActionResult<ProdutoDTO>> Get(int id)
         {
             var produto = await _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
@@ -73,6 +77,7 @@ namespace ApiCatalogo.Controllers
         }
 
         [HttpPost]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<ProdutoDTO>> Post([FromBody] ProdutoDTO produtoDto)
         {
             var produto = _mapper.Map<Produto>(produtoDto);
@@ -87,6 +92,7 @@ namespace ApiCatalogo.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult> Put(int id, [FromBody] ProdutoDTO produtoDto)
         {
             if (id != produtoDto.ProdutoId)
@@ -103,6 +109,7 @@ namespace ApiCatalogo.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<ProdutoDTO>> Delete(int id)
         {
             var produto = await _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);

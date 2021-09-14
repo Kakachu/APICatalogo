@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[Controller]")]
     [ApiController]
     public class CategoriasController : ControllerBase
@@ -32,6 +32,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("Produtos")]
+        [EnableCors("AllowRequest")]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoriasProdutos()
         {
             _logger.LogInformation("=====================GET api/categorias/produtos =========================");
@@ -44,6 +45,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet]
+        [EnableCors("AllowRequest")]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get([FromQuery] CategoriasParameters categoriasParameters)
         {
 
@@ -70,6 +72,7 @@ namespace APICatalogo.Controllers
 
 
         [HttpGet("{id}", Name = "ObterCategoriaId")]
+        [EnableCors("AllowRequest")]
         public async Task<ActionResult<Categoria>> Get(int id)
         {
             _logger.LogInformation($"=====================GET api/categorias/id = {id} =========================");
@@ -95,6 +98,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPost]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<CategoriaDTO>> Post([FromBody] CategoriaDTO categoriaDto)
         {
             try
@@ -117,6 +121,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult> Put(int id, [FromBody] CategoriaDTO categoriaDto)
         {
             try
@@ -141,6 +146,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<Categoria>> Delete(int id)
         {
             try
