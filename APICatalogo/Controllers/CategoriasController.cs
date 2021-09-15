@@ -4,6 +4,7 @@ using APICatalogo.Pagination;
 using APICatalogo.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -15,9 +16,13 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
-    //[Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("api/[Controller]")]
+    [ApiConventionType(typeof(DefaultApiConventions))]
+    [Produces("application/json")]
     [ApiController]
+    [Route("api/[Controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
+
     public class CategoriasController : ControllerBase
     {
         private readonly IUnitOfWork _context;
@@ -31,6 +36,10 @@ namespace APICatalogo.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Obtém os produtos relacionados para cada categoria
+        /// </summary>
+        /// <returns>Objetos Categoria e respectivo Objetos Produtos</returns>
         [HttpGet("Produtos")]
         [EnableCors("AllowRequest")]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoriasProdutos()
@@ -44,6 +53,10 @@ namespace APICatalogo.Controllers
             return categoriasDto;
         }
 
+        /// <summary>
+        /// Retorna uma coleção de objetos Categoria
+        /// </summary>
+        /// <returns>Lista de Categorias</returns>
         [HttpGet]
         [EnableCors("AllowRequest")]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get([FromQuery] CategoriasParameters categoriasParameters)
@@ -70,7 +83,11 @@ namespace APICatalogo.Controllers
             return categoriasDto;
         }
 
-
+        /// <summary>
+        /// Obtem uma Categoria pelo seu Id
+        /// </summary>
+        /// <param name="id">codigo do categoria</param>
+        /// <returns>Objetos Categoria</returns>
         [HttpGet("{id}", Name = "ObterCategoriaId")]
         [EnableCors("AllowRequest")]
         public async Task<ActionResult<Categoria>> Get(int id)
@@ -97,8 +114,24 @@ namespace APICatalogo.Controllers
             }
         }
 
+        /// <summary>
+        /// Inclui uma nova categoria
+        /// </summary>
+        /// <remarks>
+        /// Exemplo de request:
+        ///
+        ///     POST api/categorias
+        ///     {
+        ///        "categoriaId": 1,
+        ///        "nome": "categoria1",
+        ///        "imagemUrl": "http://teste.net/1.jpg"
+        ///     }
+        /// </remarks>
+        /// <param name="categoriaDto">objeto Categoria</param>
+        /// <returns>O objeto Categoria incluida</returns>
+        /// <remarks>Retorna um objeto Categoria incluído</remarks>
         [HttpPost]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        
         public async Task<ActionResult<CategoriaDTO>> Post([FromBody] CategoriaDTO categoriaDto)
         {
             try
@@ -120,8 +153,13 @@ namespace APICatalogo.Controllers
             }
         }
 
+        /// <summary>
+        /// Atualiza um produto pelo id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="categoriaDto"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult> Put(int id, [FromBody] CategoriaDTO categoriaDto)
         {
             try
@@ -146,7 +184,6 @@ namespace APICatalogo.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<Categoria>> Delete(int id)
         {
             try

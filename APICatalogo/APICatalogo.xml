@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>APICatalogo</name>
+    </assembly>
+    <members>
+        <member name="M:APICatalogo.Controllers.AutorizaController.RegisterUser(APICatalogo.DTOs.UsuarioDTO)">
+            <summary>
+            Registra um novo usuário
+            </summary>
+            <param name="model">Um objeto UsuarioDTO</param>
+            <returns>Status 200 e o token para o cliente</returns>
+        </member>
+        <member name="M:APICatalogo.Controllers.AutorizaController.Login(APICatalogo.DTOs.UsuarioDTO)">
+            <summary>
+            Verifica as credenciais de um usuário
+            </summary>
+            <param name="userInfo">Um objeot do tipo UsuarioDTO</param>
+            <returns>Status 200 e o token para o cliente</returns>
+            <remarks>retorna o Status 200 e o token para  novo</remarks>
+        </member>
+        <member name="M:APICatalogo.Controllers.CategoriasController.GetCategoriasProdutos">
+            <summary>
+            Obtém os produtos relacionados para cada categoria
+            </summary>
+            <returns>Objetos Categoria e respectivo Objetos Produtos</returns>
+        </member>
+        <member name="M:APICatalogo.Controllers.CategoriasController.Get(APICatalogo.Pagination.CategoriasParameters)">
+            <summary>
+            Retorna uma coleção de objetos Categoria
+            </summary>
+            <returns>Lista de Categorias</returns>
+        </member>
+        <member name="M:APICatalogo.Controllers.CategoriasController.Get(System.Int32)">
+            <summary>
+            Obtem uma Categoria pelo seu Id
+            </summary>
+            <param name="id">codigo do categoria</param>
+            <returns>Objetos Categoria</returns>
+        </member>
+        <member name="M:APICatalogo.Controllers.CategoriasController.Post(APICatalogo.DTOs.CategoriaDTO)">
+             <summary>
+             Inclui uma nova categoria
+             </summary>
+             <remarks>
+             Exemplo de request:
+            
+                 POST api/categorias
+                 {
+                    "categoriaId": 1,
+                    "nome": "categoria1",
+                    "imagemUrl": "http://teste.net/1.jpg"
+                 }
+             </remarks>
+             <param name="categoriaDto">objeto Categoria</param>
+             <returns>O objeto Categoria incluida</returns>
+             <remarks>Retorna um objeto Categoria incluído</remarks>
+        </member>
+        <member name="M:APICatalogo.Controllers.CategoriasController.Put(System.Int32,APICatalogo.DTOs.CategoriaDTO)">
+            <summary>
+            Atualiza um produto pelo id
+            </summary>
+            <param name="id"></param>
+            <param name="categoriaDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ApiCatalogo.Controllers.ProdutosController.GetProdutosPrecos">
+            <summary>
+            Obtém os produtos ordenados por preço na ordem ascendente
+            </summary>
+            <returns>Lista de objetos Produtos ordenados por preço</returns>
+        </member>
+        <member name="M:ApiCatalogo.Controllers.ProdutosController.Get(APICatalogo.Pagination.ProdutosParameters)">
+            <summary>
+            Exibe uma relação dos produtos
+            </summary>
+            <returns>Retorna uma lista de objetos Produto</returns>
+        </member>
+        <member name="M:ApiCatalogo.Controllers.ProdutosController.Get(System.Int32)">
+            <summary>
+            Obtem um produto pelo seu identificador produtoId
+            </summary>
+            <param name="id">Código do produto</param>
+            <returns>Um objeto Produto</returns>
+        </member>
+        <member name="M:ApiCatalogo.Controllers.ProdutosController.Put(System.Int32,APICatalogo.DTOs.ProdutoDTO)">
+            <summary>
+            Atualiza um produto pelo id
+            </summary>
+            <param name="id"></param>
+            <param name="produtoDto"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

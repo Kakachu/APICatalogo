@@ -13,9 +13,14 @@ using System.Threading.Tasks;
 
 namespace ApiCatalogo.Controllers
 {
-    //[Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("api/[Controller]")]
+    [ApiConventionType(typeof(DefaultApiConventions))]
+    [Produces("application/json")]
     [ApiController]
+    [Route("api/[Controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+
+    //[Authorize(AuthenticationSchemes = "Bearer")]
+
     public class ProdutosController : ControllerBase
     {
         private readonly IUnitOfWork _uof;
@@ -27,6 +32,10 @@ namespace ApiCatalogo.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Obtém os produtos ordenados por preço na ordem ascendente
+        /// </summary>
+        /// <returns>Lista de objetos Produtos ordenados por preço</returns>
         [HttpGet("menorpreco")]
         [EnableCors("AllowRequest")]
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutosPrecos()
@@ -37,6 +46,10 @@ namespace ApiCatalogo.Controllers
             return produtosDto;
         }
 
+        /// <summary>
+        /// Exibe uma relação dos produtos
+        /// </summary>
+        /// <returns>Retorna uma lista de objetos Produto</returns>
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         [EnableCors("AllowRequest")]
@@ -61,8 +74,14 @@ namespace ApiCatalogo.Controllers
             return produtosDto;
         }
 
+        /// <summary>
+        /// Obtem um produto pelo seu identificador produtoId
+        /// </summary>
+        /// <param name="id">Código do produto</param>
+        /// <returns>Um objeto Produto</returns>
         [HttpGet("{id}", Name = "ObterProduto")]
         [EnableCors("AllowRequest")]
+
         public async Task<ActionResult<ProdutoDTO>> Get(int id)
         {
             var produto = await _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
@@ -77,7 +96,6 @@ namespace ApiCatalogo.Controllers
         }
 
         [HttpPost]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<ProdutoDTO>> Post([FromBody] ProdutoDTO produtoDto)
         {
             var produto = _mapper.Map<Produto>(produtoDto);
@@ -91,8 +109,14 @@ namespace ApiCatalogo.Controllers
                 new { id = produto.ProdutoId }, produtoDTO);
         }
 
+        /// <summary>
+        /// Atualiza um produto pelo id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="produtoDto"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+
         public async Task<ActionResult> Put(int id, [FromBody] ProdutoDTO produtoDto)
         {
             if (id != produtoDto.ProdutoId)
@@ -109,7 +133,6 @@ namespace ApiCatalogo.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<ProdutoDTO>> Delete(int id)
         {
             var produto = await _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);

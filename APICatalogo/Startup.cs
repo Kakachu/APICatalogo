@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -81,16 +86,68 @@ namespace APICatalogo
                         Encoding.UTF8.GetBytes(Configuration["Jwt:key"]))
                 });
 
+            services.AddApiVersioning(options =>
+            {
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.ReportApiVersions = true;
+            });
+
+            //Swagger
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "APICatalogo",
+                    Version = "v1",
+                    Description = "Catálogo de Produtos e Categorias",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Kauã Jardim/GitHub",
+                        Email = "kauajardim2004@hotmail.com",
+                        Url = new Uri("https://github.com/Kakachu")
+                    }
+                });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+                c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First()); //This line
+
+                var security = new Dictionary<string, IEnumerable<string>>
+            {
+                {"Bearer", new string[] { }},
+            };
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Insira aqui: 'bearer ' + 'token'"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                         new OpenApiSecurityScheme
+                         {
+                            Reference = new OpenApiReference
+                         {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                         }
+                    },
+                        new string[] {}
+                }
+            });
+            });
 
             services.AddControllers()
             .AddJsonOptions(x =>
-            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
-
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "APICatalogo", Version = "v1" });
-                c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First()); //This line
-            });
+                 x.JsonSerializerOptions.ReferenceHandler
+                    = ReferenceHandler.Preserve);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -100,7 +157,11 @@ namespace APICatalogo
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                //swagger
                 app.UseSwagger();
+
+                //swaggerUI
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("./v1/swagger.json", "APICatalogo V1");
@@ -110,7 +171,7 @@ namespace APICatalogo
             loggerFactory.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
             {
                 LogLevel = LogLevel.Information
-            }));;
+            })); ;
 
 
             //Middleware de tratamento de erros
