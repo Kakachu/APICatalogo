@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 
@@ -26,14 +27,14 @@ namespace APICatalogo.Controllers
     public class CategoriasController : ControllerBase
     {
         private readonly IUnitOfWork _context;
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
+        //private readonly ILogger _logger;
 
-        public CategoriasController(IUnitOfWork contexto, ILogger<CategoriasController> logger, IMapper mapper)
+        public CategoriasController(IUnitOfWork contexto, IMapper mapper) //ILogger<CategoriasController> logger
         {
             _context = contexto;
-            _logger = logger;
             _mapper = mapper;
+            //_logger = logger;
         }
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace APICatalogo.Controllers
         [EnableCors("AllowRequest")]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoriasProdutos()
         {
-            _logger.LogInformation("=====================GET api/categorias/produtos =========================");
+            //_logger.LogInformation("=====================GET api/categorias/produtos =========================");
 
             var categorias = await _context.CategoriaRepository.GetCategoriasProdutos();
 
@@ -59,25 +60,50 @@ namespace APICatalogo.Controllers
         /// <returns>Lista de Categorias</returns>
         [HttpGet]
         [EnableCors("AllowRequest")]
-        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get([FromQuery] CategoriasParameters categoriasParameters)
+        public ActionResult<IEnumerable<CategoriaDTO>> Get()
         {
-
-            _logger.LogInformation("=====================GET api/categorias =========================");
-
-            var categorias = await _context.CategoriaRepository.
-                GetCategorias(categoriasParameters);
-            
-            var metadata = new
+            try
             {
-                categorias.TotalCount,
-                categorias.PageSize,
-                categorias.CurrentPage,
-                categorias.TotalPages,
-                categorias.HasNext,
-                categorias.HasPrevious
-            };
+                var categorias = _context.CategoriaRepository.Get().ToList();
+                var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
+                return categoriasDto;
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
 
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+        //[HttpGet]
+        //public ActionResult<IEnumerable<CategoriaDTO>> Get()
+        //{
+        //    try
+        //    {
+        //        var categorias = _context.CategoriaRepository.Get().ToList();
+        //        var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
+        //        return categoriasDto;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return BadRequest();
+        //    }           
+        //}
+
+        [HttpGet("paginacao")]
+        public ActionResult<IEnumerable<CategoriaDTO>> GetPaginacao(int pag = 1, int reg = 5)
+        {
+            if (reg > 99)
+                reg = 5;
+
+            var categorias = _context.CategoriaRepository
+                .LocalizaPagina<Categoria>(pag, reg)
+                .ToList();
+
+            var totalDeRegistros = _context.CategoriaRepository.GetTotalRegistros();
+            var numeroPaginas = ((int)Math.Ceiling((double)totalDeRegistros / reg));
+
+            Response.Headers["X-Total-Registros"] = totalDeRegistros.ToString();
+            Response.Headers["X-Numero-Paginas"] = numeroPaginas.ToString();
 
             var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
             return categoriasDto;
@@ -90,9 +116,9 @@ namespace APICatalogo.Controllers
         /// <returns>Objetos Categoria</returns>
         [HttpGet("{id}", Name = "ObterCategoriaId")]
         [EnableCors("AllowRequest")]
-        public async Task<ActionResult<Categoria>> Get(int id)
+        public async Task<ActionResult<CategoriaDTO>> Get(int? id)
         {
-            _logger.LogInformation($"=====================GET api/categorias/id = {id} =========================");
+           // _logger.LogInformation($"=====================GET api/categorias/id = {id} =========================");
 
             try
             {
@@ -100,12 +126,12 @@ namespace APICatalogo.Controllers
 
                 if (categoria == null)
                 {
-                    _logger.LogInformation($"=====================GET api/categorias/id = {id} NOT FOUND =========================");
+                    //_logger.LogInformation($"=====================GET api/categorias/id = {id} NOT FOUND =========================");
                     return NotFound($"a categoria com id ={id} não foi encontrada");
                 }
                 var categoriaDto = _mapper.Map<CategoriaDTO>(categoria);
 
-                return categoria;
+                return categoriaDto;
             }
             catch (Exception)
             {
@@ -184,10 +210,13 @@ namespace APICatalogo.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Categoria>> Delete(int id)
+        public async Task<ActionResult<Categoria>> Delete(int? id)
         {
             try
             {
+                if (!id.HasValue)
+                    return BadRequest();
+
                 var categoria = await _context.CategoriaRepository.GetById(p => p.CategoriaId == id);
 
                 if (categoria == null)

@@ -43,9 +43,10 @@ namespace APICatalogo
 
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowRequest",
-                    buider => buider.WithOrigins("https://www.apirequest.io")
-                        .WithMethods("GET"));
+                options.AddPolicy("EnableCORS", buider =>
+                {
+                    buider.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().Build();
+                });
             });
 
             var mappingConfig = new MapperConfiguration(mc =>
@@ -191,7 +192,7 @@ namespace APICatalogo
             //    .WithOrigins("https://www.apirequest.io")
             //        .WithMethods("GET"));
 
-            app.UseCors();
+            app.UseCors("EnableCORS");
 
             app.UseEndpoints(endpoints =>
             {

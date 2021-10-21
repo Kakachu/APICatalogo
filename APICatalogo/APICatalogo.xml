@@ -15,9 +15,9 @@
             <summary>
             Verifica as credenciais de um usuário
             </summary>
-            <param name="userInfo">Um objeot do tipo UsuarioDTO</param>
+            <param name="userInfo">Um objeto do tipo UsuarioDTO</param>
             <returns>Status 200 e o token para o cliente</returns>
-            <remarks>retorna o Status 200 e o token para  novo</remarks>
+            <remarks>retorna o Status 200 e o token para novo</remarks>
         </member>
         <member name="M:APICatalogo.Controllers.CategoriasController.GetCategoriasProdutos">
             <summary>
@@ -25,13 +25,13 @@
             </summary>
             <returns>Objetos Categoria e respectivo Objetos Produtos</returns>
         </member>
-        <member name="M:APICatalogo.Controllers.CategoriasController.Get(APICatalogo.Pagination.CategoriasParameters)">
+        <member name="M:APICatalogo.Controllers.CategoriasController.Get">
             <summary>
             Retorna uma coleção de objetos Categoria
             </summary>
             <returns>Lista de Categorias</returns>
         </member>
-        <member name="M:APICatalogo.Controllers.CategoriasController.Get(System.Int32)">
+        <member name="M:APICatalogo.Controllers.CategoriasController.Get(System.Nullable{System.Int32})">
             <summary>
             Obtem uma Categoria pelo seu Id
             </summary>

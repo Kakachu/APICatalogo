@@ -17,8 +17,6 @@ namespace ApiCatalogo.Controllers
     [Produces("application/json")]
     [ApiController]
     [Route("api/[Controller]")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-
     //[Authorize(AuthenticationSchemes = "Bearer")]
 
     public class ProdutosController : ControllerBase
