@@ -2,6 +2,7 @@ using APICatalogo.Controllers.Logging;
 using APICatalogo.DTOs.Mappings;
 using APICatalogo.Extensions;
 using APICatalogo.Filters;
+using APICatalogo.GraphQL;
 using APICatalogo.Models.Context;
 using APICatalogo.Repository;
 using AutoMapper;
@@ -32,6 +33,7 @@ namespace APICatalogo
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            
         }
 
         public IConfiguration Configuration { get; }
@@ -144,7 +146,6 @@ namespace APICatalogo
                 }
             });
             });
-
             services.AddControllers()
             .AddJsonOptions(x =>
                  x.JsonSerializerOptions.ReferenceHandler
@@ -155,6 +156,7 @@ namespace APICatalogo
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
             ILoggerFactory loggerFactory)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -194,10 +196,14 @@ namespace APICatalogo
 
             app.UseCors("EnableCORS");
 
+            app.UseMiddleware<TestGraphQLMiddleware>();
+
             app.UseEndpoints(endpoints =>
+
             {
                 endpoints.MapControllers();
             });
+
         }
     }
 }
