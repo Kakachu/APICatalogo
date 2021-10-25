@@ -1,14 +1,11 @@
 ﻿using APICatalogo.DTOs;
 using APICatalogo.Models;
-using APICatalogo.Pagination;
 using APICatalogo.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +19,6 @@ namespace APICatalogo.Controllers
     [ApiController]
     [Route("api/[Controller]")]
     [Authorize(AuthenticationSchemes = "Bearer")]
-    //[Authorize(AuthenticationSchemes = "Bearer")]
 
     public class CategoriasController : ControllerBase
     {
@@ -99,10 +95,10 @@ namespace APICatalogo.Controllers
                 .LocalizaPagina<Categoria>(pag, reg)
                 .ToList();
 
-            var totalDeRegistros = _context.CategoriaRepository.GetTotalRegistros();
-            var numeroPaginas = ((int)Math.Ceiling((double)totalDeRegistros / reg));
+            var totalRegistros = _context.CategoriaRepository.GetTotalRegistros();
+            var numeroPaginas = ((int)Math.Ceiling((double)totalRegistros / reg));
 
-            Response.Headers["X-Total-Registros"] = totalDeRegistros.ToString();
+            Response.Headers["X-Total-Registros"] = totalRegistros.ToString();
             Response.Headers["X-Numero-Paginas"] = numeroPaginas.ToString();
 
             var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
@@ -118,7 +114,7 @@ namespace APICatalogo.Controllers
         [EnableCors("AllowRequest")]
         public async Task<ActionResult<CategoriaDTO>> Get(int? id)
         {
-           // _logger.LogInformation($"=====================GET api/categorias/id = {id} =========================");
+            // _logger.LogInformation($"=====================GET api/categorias/id = {id} =========================");
 
             try
             {
@@ -157,7 +153,7 @@ namespace APICatalogo.Controllers
         /// <returns>O objeto Categoria incluida</returns>
         /// <remarks>Retorna um objeto Categoria incluído</remarks>
         [HttpPost]
-        
+
         public async Task<ActionResult<CategoriaDTO>> Post([FromBody] CategoriaDTO categoriaDto)
         {
             try

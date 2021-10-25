@@ -76,6 +76,11 @@
             </summary>
             <returns>Retorna uma lista de objetos Produto</returns>
         </member>
+        <member name="M:ApiCatalogo.Controllers.ProdutosController.GetPaginacao(System.Int32,System.Int32)">
+            <summary>
+            Realiza a Paginação dos produtos
+            </summary>
+        </member>
         <member name="M:ApiCatalogo.Controllers.ProdutosController.Get(System.Int32)">
             <summary>
             Obtem um produto pelo seu identificador produtoId

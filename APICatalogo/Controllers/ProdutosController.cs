@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ApiCatalogo.Controllers
@@ -17,7 +19,7 @@ namespace ApiCatalogo.Controllers
     [Produces("application/json")]
     [ApiController]
     [Route("api/[Controller]")]
-    //[Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
 
     public class ProdutosController : ControllerBase
     {
@@ -54,23 +56,34 @@ namespace ApiCatalogo.Controllers
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get([FromQuery] ProdutosParameters produtosParameters)
         {
             var produtos = await _uof.ProdutoRepository.GetProdutos(produtosParameters);
-
-            var metadata = new
-            {
-                produtos.TotalCount,
-                produtos.PageSize,
-                produtos.CurrentPage,
-                produtos.TotalPages,
-                produtos.HasNext,
-                produtos.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-
             var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
-
             return produtosDto;
         }
+
+
+        /// <summary>
+        /// Realiza a Paginação dos produtos
+        /// </summary>
+        [HttpGet("paginacao")]
+        public ActionResult<IEnumerable<ProdutoDTO>> GetPaginacao(int pag = 1, int reg = 5)
+        {
+            if (reg > 99)
+                reg = 5;
+
+            var produtos = _uof.ProdutoRepository
+                .LocalizaPagina<Produto>(pag, reg)
+                .ToList();
+
+            var totalRegistros = _uof.ProdutoRepository.GetTotalRegistros();
+            var numeroPaginas = ((int)Math.Ceiling((double)totalRegistros / reg));
+
+            Response.Headers["X-Total-Registros"] = totalRegistros.ToString();
+            Response.Headers["X-Numero-Paginas"] = numeroPaginas.ToString();
+
+            var produtoDto = _mapper.Map<List<ProdutoDTO>>(produtos);
+            return produtoDto;
+        }
+
 
         /// <summary>
         /// Obtem um produto pelo seu identificador produtoId

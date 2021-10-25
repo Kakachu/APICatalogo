@@ -50,7 +50,6 @@ namespace APICatalogo.Repository
                 .Skip(quantidadeRegistros * (numeroPagina - 1))
                   .Take(quantidadeRegistros).ToList();
         }
-
         public int GetTotalRegistros()
         {
             return _context.Set<T>().AsNoTracking().Count();
