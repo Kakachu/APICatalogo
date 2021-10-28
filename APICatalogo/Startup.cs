@@ -2,7 +2,6 @@ using APICatalogo.Controllers.Logging;
 using APICatalogo.DTOs.Mappings;
 using APICatalogo.Extensions;
 using APICatalogo.Filters;
-using APICatalogo.GraphQL;
 using APICatalogo.Models.Context;
 using APICatalogo.Repository;
 using AutoMapper;
@@ -195,8 +194,6 @@ namespace APICatalogo
             //        .WithMethods("GET"));
 
             app.UseCors("EnableCORS");
-
-            app.UseMiddleware<TestGraphQLMiddleware>();
 
             app.UseEndpoints(endpoints =>
 
